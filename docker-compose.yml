@@ -1,0 +1,211 @@
+services:
+
+  # ==================== Infrastructure ====================
+
+  mysql:
+    image: mysql:8.0
+    container_name: ecommerce-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+    volumes:
+      - ./local-run/init/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./local-run/var/mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot123"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - ecommerce-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: ecommerce-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./local-run/var/redis:/data
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ecommerce-net
+
+  nacos:
+    image: nacos/nacos-server:v2.5.1
+    container_name: ecommerce-nacos
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+    environment:
+      MODE: standalone
+      NACOS_AUTH_ENABLE: "false"
+    volumes:
+      - ./local-run/var/nacos:/home/nacos/data
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8848/nacos/v1/console/health/liveness"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - ecommerce-net
+
+  rocketmq-namesrv:
+    image: apache/rocketmq:5.3.1
+    container_name: ecommerce-rocketmq-namesrv
+    ports:
+      - "9876:9876"
+    command: sh mqnamesrv
+    volumes:
+      - ./local-run/var/rocketmq/namesrv:/home/rocketmq/store
+
+    networks:
+      - ecommerce-net
+
+  rocketmq-broker:
+    image: apache/rocketmq:5.3.1
+    container_name: ecommerce-rocketmq-broker
+    ports:
+      - "10911:10911"
+      - "10909:10909"
+    environment:
+      NAMESRV_ADDR: rocketmq-namesrv:9876
+    command: sh mqbroker -n rocketmq-namesrv:9876 --enable-proxy
+    volumes:
+      - ./local-run/var/rocketmq/broker:/home/rocketmq/store
+
+    depends_on:
+      - rocketmq-namesrv
+    networks:
+      - ecommerce-net
+
+  sentinel-dashboard:
+    build:
+      context: ./local-run/init/sentinel
+      dockerfile: Dockerfile
+    container_name: ecommerce-sentinel
+    ports:
+      - "8858:8858"
+    networks:
+      - ecommerce-net
+
+  # ==================== Monitoring ====================
+
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    container_name: ecommerce-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./local-run/init/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - ecommerce-net
+
+  grafana:
+    image: grafana/grafana:11.0.0
+    container_name: ecommerce-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - ./local-run/init/grafana/provisioning:/etc/grafana/provisioning
+      - ./local-run/init/grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      - prometheus
+    networks:
+      - ecommerce-net
+
+  # ==================== Application Services ====================
+
+  gateway-service:
+    build:
+      context: ./gateway-service
+      dockerfile: Dockerfile
+    container_name: ecommerce-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      NACOS_SERVER_ADDR: nacos:8848
+      SENTINEL_DASHBOARD: sentinel-dashboard:8858
+    depends_on:
+      nacos:
+        condition: service_healthy
+    networks:
+      - ecommerce-net
+
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    container_name: ecommerce-user
+    ports:
+      - "8081:8081"
+    environment:
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_HOST: mysql
+      REDIS_HOST: redis
+      SENTINEL_DASHBOARD: sentinel-dashboard:8858
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - ecommerce-net
+
+  product-service:
+    build:
+      context: ./product-service
+      dockerfile: Dockerfile
+    container_name: ecommerce-product
+    ports:
+      - "8082:8082"
+    environment:
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_HOST: mysql
+      SENTINEL_DASHBOARD: sentinel-dashboard:8858
+      ROCKETMQ_NAMESRV: rocketmq-namesrv:9876
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      rocketmq-broker:
+        condition: service_started
+    networks:
+      - ecommerce-net
+
+  order-service:
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    container_name: ecommerce-order
+    ports:
+      - "8083:8083"
+    environment:
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_HOST: mysql
+      SENTINEL_DASHBOARD: sentinel-dashboard:8858
+      ROCKETMQ_NAMESRV: rocketmq-namesrv:9876
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      rocketmq-broker:
+        condition: service_started
+    networks:
+      - ecommerce-net
+
+networks:
+  ecommerce-net:
+    driver: bridge
