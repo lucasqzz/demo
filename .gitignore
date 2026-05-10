@@ -1,33 +1,50 @@
-# Compiled class file
+# ==================== Java / Maven ====================
 *.class
-
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
 *.jar
 *.war
 *.nar
 *.ear
+**/target/
+
+# ==================== Frontend / Node ====================
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# ==================== Docker runtime data ====================
+local-run/var/
+
+# ==================== IDE ====================
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# ==================== OS ====================
+.DS_Store
+Thumbs.db
+
+# ==================== Logs ====================
+*.log
+hs_err_pid*
+replay_pid*
+npm-debug.log*
+
+# ==================== Secrets / Credentials ====================
+*.env
+*.env.*
+!*.env.example
+*.pem
+*.key
+*.p12
+*.jks
+credentials*
+secret*
+
+# ==================== Build / Temp ====================
 *.zip
 *.tar.gz
 *.rar
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-replay_pid*
-/**/target/**
-
-# Docker runtime data (not tracked)
-local-run/var/
-
-# IDE
-.idea/
-*.iml
-.DS_Store
+.mtj.tmp/
+*.ctxt
