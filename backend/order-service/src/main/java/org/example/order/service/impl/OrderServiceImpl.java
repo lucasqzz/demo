@@ -81,7 +81,11 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<OrderDTO> getOrdersByUserId(Long userId) {
-        return orderMapper.findByUserId(userId).stream()
+        List<Order> orders = orderMapper.findByUserId(userId);
+        if (orders == null) {
+            return List.of();
+        }
+        return orders.stream()
                 .map(o -> toDTO(o, parseItems(o.getItemsJson())))
                 .toList();
     }
@@ -98,9 +102,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private List<OrderItemDTO> parseItems(String json) {
+        if (json == null || json.isBlank()) {
+            return List.of();
+        }
         try {
             return objectMapper.readValue(json, new TypeReference<>() {});
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             return List.of();
         }
     }

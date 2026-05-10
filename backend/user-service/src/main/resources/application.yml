@@ -2,6 +2,20 @@ server:
   port: 8081
 
 spring:
+  application:
+    name: user-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+      config:
+        server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+        file-extension: yml
+        import-check:
+          enabled: false
+    sentinel:
+      transport:
+        dashboard: ${SENTINEL_DASHBOARD:127.0.0.1:8858}
   datasource:
     url: jdbc:mysql://${MYSQL_HOST:127.0.0.1}:3306/ecommerce_user?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
     username: ${MYSQL_USER:root}
@@ -11,10 +25,6 @@ spring:
     redis:
       host: ${REDIS_HOST:127.0.0.1}
       port: 6379
-  cloud:
-    sentinel:
-      transport:
-        dashboard: ${SENTINEL_DASHBOARD:127.0.0.1:8858}
 
 mybatis:
   configuration:

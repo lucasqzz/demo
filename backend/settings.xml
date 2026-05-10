@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 
+          https://maven.apache.org/xsd/settings-1.2.0.xsd">
+    
+    <!-- 本地仓库路径，默认在 ~/.m2/repository -->
+    <localRepository>${user.home}/.m2/repository</localRepository>
+    
+    <!-- 插件仓库 -->
+    <pluginGroups></pluginGroups>
+    
+    <proxies></proxies>
+    
+    <!-- 服务器配置（可空，除非需要认证） -->
+    <servers></servers>
+    
+    <!-- 镜像配置 -->
+    <mirrors>
+        <!-- 阿里云中央仓库镜像 -->
+        <mirror>
+            <id>aliyunmaven</id>
+            <mirrorOf>central</mirrorOf>
+            <name>阿里云公共仓库</name>
+            <url>https://maven.aliyun.com/repository/public</url>
+        </mirror>
+        
+        <!-- 阿里云 Google 仓库镜像 -->
+        <mirror>
+            <id>aliyun-google</id>
+            <mirrorOf>google</mirrorOf>
+            <name>阿里云 Google 仓库</name>
+            <url>https://maven.aliyun.com/repository/google</url>
+        </mirror>
+        
+        <!-- 阿里云 Spring 仓库镜像 -->
+        <mirror>
+            <id>aliyun-spring</id>
+            <mirrorOf>spring</mirrorOf>
+            <name>阿里云 Spring 仓库</name>
+            <url>https://maven.aliyun.com/repository/spring</url>
+        </mirror>
+        
+        <!-- 阿里云 Apache 快照仓库镜像 -->
+        <mirror>
+            <id>aliyun-apache-snapshots</id>
+            <mirrorOf>apache-snapshots</mirrorOf>
+            <name>阿里云 Apache 快照仓库</name>
+            <url>https://maven.aliyun.com/repository/apache-snapshots</url>
+        </mirror>
+        
+        <!-- 阿里云 Gradle 插件仓库镜像 -->
+        <mirror>
+            <id>aliyun-gradle-plugin</id>
+            <mirrorOf>gradle-plugin</mirrorOf>
+            <name>阿里云 Gradle 插件仓库</name>
+            <url>https://maven.aliyun.com/repository/gradle-plugin</url>
+        </mirror>
+        
+        <!-- 阿里云 JCenter 仓库镜像 -->
+        <mirror>
+            <id>aliyun-jcenter</id>
+            <mirrorOf>jcenter</mirrorOf>
+            <name>阿里云 JCenter 仓库</name>
+            <url>https://maven.aliyun.com/repository/jcenter</url>
+        </mirror>
+        
+        <!-- 配置所有仓库都使用阿里云镜像 -->
+        <mirror>
+            <id>aliyun-all</id>
+            <mirrorOf>*</mirrorOf>
+            <name>阿里云所有仓库</name>
+            <url>https://maven.aliyun.com/repository/public</url>
+        </mirror>
+    </mirrors>
+    
+    <!-- 配置文件激活 -->
+    <profiles>
+        <!-- 阿里云仓库配置 -->
+        <profile>
+            <id>aliyun</id>
+            <repositories>
+                <repository>
+                    <id>aliyunmaven</id>
+                    <name>阿里云公共仓库</name>
+                    <url>https://maven.aliyun.com/repository/public</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>false</enabled>  <!-- 默认关闭快照，需要时可开启 -->
+                    </snapshots>
+                </repository>
+                
+                <!-- 阿里云 Spring 仓库 -->
+                <repository>
+                    <id>aliyun-spring</id>
+                    <name>阿里云 Spring 仓库</name>
+                    <url>https://maven.aliyun.com/repository/spring</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                </repository>
+                
+                <!-- 阿里云 Google 仓库 -->
+                <repository>
+                    <id>aliyun-google</id>
+                    <name>阿里云 Google 仓库</name>
+                    <url>https://maven.aliyun.com/repository/google</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+            
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>aliyunmaven</id>
+                    <name>阿里云公共仓库</name>
+                    <url>https://maven.aliyun.com/repository/public</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                </pluginRepository>
+            </pluginRepositories>
+        </profile>
+    </profiles>
+    
+    <!-- 激活阿里云配置 -->
+    <activeProfiles>
+        <activeProfile>aliyun</activeProfile>
+    </activeProfiles>
+</settings>
+
