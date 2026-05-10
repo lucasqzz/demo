@@ -1,6 +1,5 @@
-FROM eclipse-temurin:21-jre
-RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
-RUN wget -O /sentinel-dashboard.jar \
-    https://github.com/alibaba/Sentinel/releases/download/1.8.9/sentinel-dashboard-1.8.9.jar
+FROM maven:3.9-eclipse-temurin-21
+WORKDIR /app
+COPY sentinel-dashboard-1.8.9.jar /app/sentinel-dashboard.jar
 EXPOSE 8858
-ENTRYPOINT ["java", "-Dserver.port=8858", "-jar", "/sentinel-dashboard.jar"]
+ENTRYPOINT ["java", "-Dserver.port=8858", "-jar", "/app/sentinel-dashboard.jar"]

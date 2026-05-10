@@ -85,6 +85,9 @@ services:
     networks:
       - ecommerce-net
 
+  # sentinel-dashboard 需要先下载 JAR 到 local-run/init/sentinel/:
+  #   https://github.com/alibaba/Sentinel/releases/download/1.8.9/sentinel-dashboard-1.8.9.jar
+  # 然后: docker-compose --profile sentinel up -d
   sentinel-dashboard:
     build:
       context: ./local-run/init/sentinel
@@ -94,6 +97,8 @@ services:
       - "8858:8858"
     networks:
       - ecommerce-net
+    profiles:
+      - sentinel
 
   # ==================== Monitoring ====================
 
@@ -122,11 +127,11 @@ services:
     networks:
       - ecommerce-net
 
-  # ==================== Application Services ====================
+  # ==================== Application Services (--profile app) ====================
 
   gateway-service:
     build:
-      context: ./gateway-service
+      context: ./backend/gateway-service
       dockerfile: Dockerfile
     container_name: ecommerce-gateway
     ports:
@@ -139,10 +144,12 @@ services:
         condition: service_healthy
     networks:
       - ecommerce-net
+    profiles:
+      - app
 
   user-service:
     build:
-      context: ./user-service
+      context: ./backend/user-service
       dockerfile: Dockerfile
     container_name: ecommerce-user
     ports:
@@ -161,10 +168,12 @@ services:
         condition: service_healthy
     networks:
       - ecommerce-net
+    profiles:
+      - app
 
   product-service:
     build:
-      context: ./product-service
+      context: ./backend/product-service
       dockerfile: Dockerfile
     container_name: ecommerce-product
     ports:
@@ -183,10 +192,12 @@ services:
         condition: service_started
     networks:
       - ecommerce-net
+    profiles:
+      - app
 
   order-service:
     build:
-      context: ./order-service
+      context: ./backend/order-service
       dockerfile: Dockerfile
     container_name: ecommerce-order
     ports:
@@ -205,6 +216,20 @@ services:
         condition: service_started
     networks:
       - ecommerce-net
+    profiles:
+      - app
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ecommerce-frontend
+    ports:
+      - "3001:80"
+    networks:
+      - ecommerce-net
+    profiles:
+      - app
 
 networks:
   ecommerce-net:
