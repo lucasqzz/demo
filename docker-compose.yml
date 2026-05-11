@@ -111,6 +111,8 @@ services:
       - ./local-run/init/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - ecommerce-net
+    profiles:
+      - app
 
   grafana:
     image: grafana/grafana:11.0.0
@@ -126,6 +128,8 @@ services:
       - prometheus
     networks:
       - ecommerce-net
+    profiles:
+      - app
 
   # ==================== Application Services (--profile app) ====================
 
